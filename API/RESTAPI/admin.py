@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Student,Cleaner
+from .models import Student,Cleaner,SuperUser, RoomCleanData
 # Register your models here.
 
 
@@ -17,3 +17,19 @@ class CleanerAdmin(admin.ModelAdmin):
     list_display = ['c_Name', 'c_Registration_Number', 'c_Block']
     list_filter = ['c_Block']
     search_fields = ['c_Name', 'c_Registration_Number']
+
+
+class SuperUserAdmin(admin.ModelAdmin):
+    list_display = ('su_Name', 'su_ID', 'su_SECRETKEY', 'su_Password', 'su_Block', 'su_Type', 'date_added')
+    readonly_fields = ('su_SECRETKEY', 'date_added')
+
+admin.site.register(SuperUser, SuperUserAdmin)
+
+class RoomCleanDataAdmin(admin.ModelAdmin):
+    list_display = ['student', 'completed', 'cleaner_ID', 'date_added', 'date_completed']
+    list_filter = ['completed']
+    search_fields = ['student__s_Name']
+    readonly_fields = ['date_added', 'date_completed'] 
+
+admin.site.register(RoomCleanData, RoomCleanDataAdmin)
+
