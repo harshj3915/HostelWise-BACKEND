@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Student, Cleaner, SuperUser, RoomCleanData
+from .models import Student, Cleaner, SuperUser, RoomCleanData, ComplainData,MessFeedbackData
 
 
 class StudentSerializer(serializers.ModelSerializer):
@@ -29,3 +29,36 @@ class RoomCleanDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = RoomCleanData
         fields = ('student', 'completed', 'cleaner_ID', 'date_added', 'date_completed')
+
+class RoomCleanDataPUT(serializers.ModelSerializer):
+    completed = serializers.BooleanField(required=True)
+    cleaner_ID = serializers.CharField(max_length=100)
+    class Meta:
+        model = RoomCleanData
+        fields = ('completed', 'cleaner_ID')
+
+class ComplainDataSerializer(serializers.ModelSerializer):
+    student = serializers.PrimaryKeyRelatedField(queryset=Student.objects.all(), allow_null=True)
+    completed = serializers.BooleanField(default=False)
+    date_added = serializers.DateTimeField(read_only=True)
+
+    class Meta:
+        model = ComplainData
+        fields = ('student','message', 'completed', 'date_added', 'date_completed')
+
+class MaintainanceRequestSerializer(serializers.ModelSerializer):
+    student = serializers.PrimaryKeyRelatedField(queryset=Student.objects.all(), allow_null=True)
+    completed = serializers.BooleanField(default=False)
+    date_added = serializers.DateTimeField(read_only=True)
+
+    class Meta:
+        model = ComplainData
+        fields = ('student','message', 'completed', 'date_added', 'date_completed')
+
+class MessFeedbackRequestSerializer(serializers.ModelSerializer):
+    student = serializers.PrimaryKeyRelatedField(queryset=Student.objects.all(), allow_null=True)
+    date_added = serializers.DateTimeField(read_only=True)
+
+    class Meta:
+        model = MessFeedbackData
+        fields = ('student','message','date_added')

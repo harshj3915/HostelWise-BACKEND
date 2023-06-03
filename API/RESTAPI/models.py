@@ -64,5 +64,33 @@ class RoomCleanData(models.Model):
             self.date_completed = timezone.now().strftime('%B %d, %Y, %I:%M %p')
         super().save(*args, **kwargs)
 
+class ComplainData(models.Model):
+    student = models.ForeignKey('Student', on_delete=models.CASCADE,blank=True)
+    message=models.CharField(max_length=5000)
+    completed = models.BooleanField(default=False)
+    date_added = models.DateTimeField(auto_now_add=True)
+    date_completed = models.CharField(blank=True,max_length=100,null=True)
+
+    def save(self, *args, **kwargs):
+        if self.completed and not self.date_completed:
+            self.date_completed = timezone.now().strftime('%B %d, %Y, %I:%M %p')
+        super().save(*args, **kwargs)
+
+class MaintainanceRequestData(models.Model):
+    student = models.ForeignKey('Student', on_delete=models.CASCADE,blank=True)
+    message=models.CharField(max_length=5000)
+    completed = models.BooleanField(default=False)
+    date_added = models.DateTimeField(auto_now_add=True)
+    date_completed = models.CharField(blank=True,max_length=100,null=True)
+
+    def save(self, *args, **kwargs):
+        if self.completed and not self.date_completed:
+            self.date_completed = timezone.now().strftime('%B %d, %Y, %I:%M %p')
+        super().save(*args, **kwargs)
+
+class MessFeedbackData(models.Model):
+    student = models.ForeignKey('Student', on_delete=models.CASCADE,blank=True)
+    message=models.CharField(max_length=5000)
+    date_added = models.DateTimeField(auto_now_add=True)
 
 

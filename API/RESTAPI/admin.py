@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Student,Cleaner,SuperUser, RoomCleanData
+from .models import Student,Cleaner,SuperUser, RoomCleanData, ComplainData, MaintainanceRequestData, MessFeedbackData
 # Register your models here.
 
 
@@ -32,4 +32,29 @@ class RoomCleanDataAdmin(admin.ModelAdmin):
     readonly_fields = ['date_added', 'date_completed'] 
 
 admin.site.register(RoomCleanData, RoomCleanDataAdmin)
+
+class ComplainDataAdmin(admin.ModelAdmin):
+    list_display = ('student', 'message', 'completed', 'date_added', 'date_completed')
+    list_filter = ('completed',)
+    search_fields = ('student__name', 'message')
+    readonly_fields = ('date_added', 'date_completed')
+
+admin.site.register(ComplainData, ComplainDataAdmin)
+
+class MaintainanceRequestDataAdmin(admin.ModelAdmin):
+    list_display = ('student', 'message', 'completed', 'date_added', 'date_completed')
+    list_filter = ('completed',)
+    search_fields = ('student__name', 'message')
+    readonly_fields = ('date_added', 'date_completed')
+
+admin.site.register(MaintainanceRequestData, MaintainanceRequestDataAdmin)
+
+
+class MessFeedbackDataAdmin(admin.ModelAdmin):
+    list_display = ('student', 'message', 'date_added')
+    list_filter = ('date_added',)
+    search_fields = ('student__name', 'message')
+    readonly_fields = ('date_added',)
+
+admin.site.register(MessFeedbackData,MessFeedbackDataAdmin)
 

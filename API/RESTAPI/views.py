@@ -4,10 +4,10 @@ from django.shortcuts import render
 from rest_framework import status
 from rest_framework.response import Response
 from .models import Student
-from .serializer import RoomCleanDataSerializer, StudentSerializer
+from .serializer import MaintainanceRequestSerializer, RoomCleanDataPUT, RoomCleanDataSerializer, StudentSerializer, ComplainDataSerializer, MessFeedbackRequestSerializer
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
-from .models import Student,Cleaner,SuperUser,RoomCleanData
+from .models import Student,Cleaner,SuperUser,RoomCleanData,ComplainData,MaintainanceRequestData,MessFeedbackData
 import json
 
 #ngrok http 8000
@@ -64,7 +64,7 @@ def GENERALLOGIN(request):
         else:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-@api_view(['GET','POST'])
+@api_view(['GET','POST','PUT'])
 def GENERALDASHBOARD(request,api_key,action):
     
     if Student.objects.filter(s_SECRETKEY = api_key).exists:
@@ -88,29 +88,86 @@ def GENERALDASHBOARD(request,api_key,action):
 
             #Register complain --> action = B
             elif action == "B":
-                return Response(status=status.HTTP_200_OK)
+                serializer=ComplainDataSerializer(data={'student': CURRENT_STUDENT.pk,'message': request.data['message'],'completed':False})
+                if serializer.is_valid():
+                    serializer.save()
+                    return Response(status=status.HTTP_200_OK)
+                else:
+                    print(serializer.errors)
+                return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
             #Maintainance request --> action = C
             elif action == "C":
-                return Response(status=status.HTTP_200_OK)
+                serializer=MaintainanceRequestSerializer(data={'student': CURRENT_STUDENT.pk,'message': request.data['message'],'completed':False})
+                if serializer.is_valid():
+                    serializer.save()
+                    return Response(status=status.HTTP_200_OK)
+                else:
+                    print(serializer.errors)
+                return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
             #Request mess food --> action = D
             elif action == "D":
-                return Response(status=status.HTTP_200_OK)
+                serializer=MessFeedbackRequestSerializer(data={'student': CURRENT_STUDENT.pk,'message': request.data['message']})
+                if serializer.is_valid():
+                    serializer.save()
+                    return Response(status=status.HTTP_200_OK)
+                else:
+                    print(serializer.errors)
+                return Response(status=status.HTTP_400_BAD_REQUEST)
         
 
         elif request.method=='GET':
             
             if action == 'Z':
-                print('us')
                 user = model_to_dict(CURRENT_STUDENT)
                 del user['s_SECRETKEY']
                 del user['s_Password']
                 print(user)
                 return Response(user, status=status.HTTP_202_ACCEPTED)
+            
+            elif action=="A":
+                roomcleandatahistory = RoomCleanData.objects.filter(student=CURRENT_STUDENT)
+                serializer = RoomCleanDataSerializer(roomcleandatahistory, many=True)
+                return JsonResponse(serializer.data,safe=False)
+            
+            elif action=="B":
+                complaindatahistory = ComplainData.objects.filter(student=CURRENT_STUDENT)
+                serializer = ComplainDataSerializer(complaindatahistory, many=True)
+                return JsonResponse(serializer.data,safe=False)
+            
+            elif action=="C":
+                maintainancehistory = MaintainanceRequestData.objects.filter(student=CURRENT_STUDENT)
+                serializer = MaintainanceRequestSerializer(maintainancehistory, many=True)
+                return JsonResponse(serializer.data,safe=False)
+            
+            elif action =="D":
+                messfeedbackhistory = MessFeedbackData.objects.filter(student=CURRENT_STUDENT)
+                serializer = MessFeedbackRequestSerializer(messfeedbackhistory, many=True)
+                return JsonResponse(serializer.data,safe=False)
 
+
+        elif request.method == 'PUT':
+            if action == 'A':
+
+                roomclean = RoomCleanData.objects.filter(student=CURRENT_STUDENT,completed=False)
+                roomclean = roomclean.first()
+                if roomclean == None:
+                    return Response(status=status.HTTP_404_NOT_FOUND)
+                else:
+
+                    serializer = RoomCleanDataPUT(roomclean,data=request.data)
+                    if serializer.is_valid():
+                        
+                        serializer.save()
+                        CURRENT_STUDENT.s_Already_Requested_Room_clean=False
+                        CURRENT_STUDENT.save()
+                        return Response(status=status.HTTP_200_OK)
+                    return Response(serializer.error_messages,status=status.HTTP_304_NOT_MODIFIED)
+    else:
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
 
         
